@@ -50,18 +50,24 @@ node_modules/
 .next/
 .vscode
 
-# ChromaDB Vector Store
-chromadb_store/
-
-# Temporary Scratch & Logs
-scratch/
-*.log
-*.tmp
-*.bak
-*_backup.csv
-.gitignore_local_backup
-
-# Local User Backup
+# 로컬 자동 백업 디렉토리 및 백업본
 backup_my_work/
-latest_demo/
-AGENTS.md
+*backup*.*
+*.backup.*
+*.bak
+*.tmp
+
+# 벡터 데이터베이스 및 캐시 파일
+chromadb_store/
+festapick/chromadb_store/
+*cache.json
+tour_api_cache.json
+festival_poster_naver_cache.json
+
+# 임시 스크립트 및 테스트 파일
+fest_cols.txt
+fest_programs_check.json
+scratch_*.py
+test_img.py
+view_ryu_app.py
+run_ryu_app.bat

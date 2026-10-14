@@ -12,6 +12,7 @@ import requests
 import glob
 # 타입 힌트 지정을 위해 typing 모듈에서 필요한 타입 클래스들을 불러옵니다.
 from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime
 
 # 표 형태의 데이터(CSV)를 읽고 가공하기 위해 pandas 라이브러리를 불러옵니다.
 import pandas as pd
@@ -68,15 +69,25 @@ except ImportError:
     def get_storytelling_system_prompt() -> str:
         return "당신은 여행 기획 전문 AI 수석 에디터입니다. 감성적인 스토리텔링 코스를 작성해주세요."
 
-    def build_storytelling_user_prompt(course_package: Dict[str, Any], companion: str = "친구/연인") -> str:
-        return f"축제: {course_package.get('festival_name')} 코스를 스토리텔링으로 작성해주세요."
+    def build_storytelling_user_prompt(course_package: Dict[str, Any], companion: str = "혼자") -> str:
+        return f"축제: {course_package.get('festival_name')} 코스를 {companion} 맞춤 스토리텔링으로 작성해주세요."
 
-    def generate_storytelling_fallback(course_package: Dict[str, Any], companion: str = "친구/연인") -> str:
+    def generate_storytelling_fallback(course_package: Dict[str, Any], companion: str = "혼자") -> str:
         f_name = course_package.get("festival_name", "지역 축제")
         sigungu = course_package.get("target_sigungu", "")
-        return f"# 🌿 [{sigungu}] {f_name} 감성 힐링 여행\n\n주차장에 편안히 도착해 축제장을 거닐고, 맛있는 로컬 식사와 힐링 쉼터로 하루를 완성합니다."
+        prefix = f"[{sigungu}] " if sigungu else ""
+        comp_titles = {
+            "혼자": "나홀로 사색 여행",
+            "부모님": "효도 맞춤 힐링 여행",
+            "가족": "온 가족 안심 나들이",
+            "커플": "로맨틱 감성 데이트",
+            "친구": "유쾌한 친구들과의 핫플 투어",
+            "반려동물": "반려동물과 함께하는 힐링 산책"
+        }
+        title_suffix = comp_titles.get(companion, "감성 힐링 여행")
+        return f"# 🌿 {prefix}{f_name} {title_suffix}\n\n동행인({companion})의 눈높이에 맞춘 편안한 주차, 로컬 식사, 힐링 쉼터 코스로 하루를 완성합니다."
 
-    def generate_storytelling_course(course_package: Dict[str, Any], companion: str = "친구/연인") -> str:
+    def generate_storytelling_course(course_package: Dict[str, Any], companion: str = "혼자") -> str:
         return generate_storytelling_fallback(course_package, companion=companion)
 
 # ==============================================================================
@@ -1681,7 +1692,7 @@ class PublicDataRAGManager:
         self,
         festival_name: str,
         user_stamina: str = "중",
-        companion: str = "연인",
+        companion: str = "혼자",
         *args,
         **kwargs
     ) -> Dict[str, Any]:
@@ -2128,7 +2139,7 @@ class PublicDataRAGManager:
     def generate_storytelling_course(
         self,
         course_package: Dict[str, Any],
-        companion: str = "친구/연인"
+        companion: str = "혼자"
     ) -> str:
         """timeline에 담긴 실제 4단계 데이터를 agent.py와 연동하여
         여행 기획 전문 AI 에디터 톤의 풍부한 감성 스토리텔링 줄글 에세이를 생성합니다."""
@@ -2196,8 +2207,8 @@ def _load_adapter_csv(filename_patterns: List[str]) -> pd.DataFrame:
     return pd.DataFrame()
 
 
-def get_festivals(region: str = "전국 전체", month: Optional[int] = None, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-    """전국 17개 행정구역 및 월별 필터링을 거친 유효 위경도 축제 목록을 반환합니다."""
+def get_festivals(region: str = "전국 전체", month: Optional[int] = None, year: Optional[int] = None, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    """전국 17개 행정구역, 개최연도 및 월별 필터링을 거친 유효 위경도 축제 목록을 반환합니다."""
     global _ADAPTER_FEST_CACHE
     if _ADAPTER_FEST_CACHE is None or _ADAPTER_FEST_CACHE.empty:
         _ADAPTER_FEST_CACHE = _load_adapter_csv(["*문화축제*.csv", "festivals.csv", "*공연행사*.csv"])
@@ -2232,34 +2243,58 @@ def get_festivals(region: str = "전국 전체", month: Optional[int] = None, *a
         aliases = region_map.get(region, [region, short_region])
         pattern = "|".join(list(set(aliases)))
         
-        target_cols = ["소재지도로명주소", "소재지지번주소", "개최장소", "축제명"]
-        mask = pd.Series(False, index=df.index)
-        for col in target_cols:
+        # 주소 관련 컬럼(소재지도로명주소, 소재지지번주소, 개최장소)을 1순위로 필터링
+        # 축제명에 "경기" 등의 지역명 단어가 포함되어 오매칭되는 현상을 방지
+        addr_cols = ["소재지도로명주소", "소재지지번주소", "개최장소"]
+        addr_mask = pd.Series(False, index=df.index)
+        has_addr = pd.Series(False, index=df.index)
+        for col in addr_cols:
             if col in df.columns:
-                mask = mask | df[col].astype(str).str.contains(pattern, na=False)
-        df = df[mask]
+                col_val = df[col].astype(str).str.strip()
+                is_valid = (col_val != "") & (col_val.str.lower() != "nan") & (col_val.str.lower() != "none")
+                has_addr = has_addr | is_valid
+                addr_mask = addr_mask | (is_valid & col_val.str.contains(pattern, na=False))
 
-    # 2. 날짜(월) 필터링
+        # 주소가 유효한 데이터는 주소 일치 여부만으로 판정하고, 주소 컬럼이 모두 비어있는 경우에만 축제명 매칭 확인
+        name_mask = pd.Series(False, index=df.index)
+        if "축제명" in df.columns:
+            name_mask = df["축제명"].astype(str).str.contains(pattern, na=False)
+
+        region_mask = addr_mask | (~has_addr & name_mask)
+        df = df[region_mask]
+
+    # 2. 날짜(연도 및 월) 필터링
+    year = year or kwargs.get("year")
+    s_col = df["축제시작일자"] if "축제시작일자" in df.columns else pd.Series(index=df.index, dtype=object)
+    e_col = df["축제종료일자"] if "축제종료일자" in df.columns else pd.Series(index=df.index, dtype=object)
+    s_date = pd.to_datetime(s_col, errors="coerce")
+    e_date = pd.to_datetime(e_col, errors="coerce")
+
+    # 시작일이나 종료일이 누락된(NaN) 축제는 무조건 필터링에서 제외(Drop)
+    valid_dates = s_date.notna() & e_date.notna()
+
+    # 연도 조건: 특정 연도가 지정된 경우 해당 연도 축제만, 지정되지 않은 경우 최근 3년 이내 행사 허용
+    current_year = datetime.now().year
+    if year:
+        year_mask = (s_date.dt.year == year) | (e_date.dt.year == year)
+    else:
+        min_year = current_year - 3
+        year_mask = (e_date.dt.year >= min_year) | (s_date.dt.year >= min_year)
+
     if month and 1 <= month <= 12:
-        s_col = df["축제시작일자"] if "축제시작일자" in df.columns else pd.Series(index=df.index, dtype=object)
-        e_col = df["축제종료일자"] if "축제종료일자" in df.columns else pd.Series(index=df.index, dtype=object)
-        s_date = pd.to_datetime(s_col, errors="coerce")
-        e_date = pd.to_datetime(e_col, errors="coerce")
-        
-        # 1) 시작일이나 종료일이 누락된(NaN) 축제는 무조건 필터링에서 제외(Drop)
-        valid_dates = s_date.notna() & e_date.notna()
-        
         s_month = s_date.dt.month
         e_month = e_date.dt.month
         
-        # 2) s_month <= e_month 인 경우 (일반): s_month <= month <= e_month
+        # 일반 기간: s_month <= month <= e_month
         normal_mask = (s_month <= e_month) & (s_month <= month) & (month <= e_month)
-        
-        # 3) s_month > e_month 인 경우 (연도 교차 축제, 예: 11월~2월): month >= s_month 이거나 month <= e_month
+        # 연도 교차 축제 (예: 11월~2월): month >= s_month 이거나 month <= e_month
         cross_mask = (s_month > e_month) & ((month >= s_month) | (month <= e_month))
         
-        mask_month = valid_dates & (normal_mask | cross_mask)
-        df = df[mask_month]
+        mask_date = valid_dates & year_mask & (normal_mask | cross_mask)
+    else:
+        mask_date = valid_dates & year_mask
+
+    df = df[mask_date]
 
     results: List[Dict[str, Any]] = []
     seen = set()
@@ -2307,6 +2342,32 @@ def get_festivals(region: str = "전국 전체", month: Optional[int] = None, *a
             else:
                 homepage = raw_hp
 
+        # 원본 데이터로부터 프로그램 추출 및 딕셔너리 리스트 구성
+        prog_raw = (
+            clean_text(row.get("주요프로그램", ""))
+            or clean_text(row.get("프로그램내용", ""))
+            or clean_text(row.get("프로그램명", ""))
+            or clean_text(row.get("행사내용", ""))
+            or desc
+        )
+        parsed_programs = []
+        if prog_raw:
+            stopwords = {"등", "기타", "체험행사", "축제내용", "행사내용"}
+            split_candidates = re.split(r'[+,/;\n]', str(prog_raw))
+            seen_progs = set()
+            for cand in split_candidates:
+                p_name = cand.strip()
+                if len(p_name) >= 2 and p_name not in stopwords and p_name not in seen_progs:
+                    seen_progs.add(p_name)
+                    parsed_programs.append({
+                        "name": p_name,
+                        "category": "축제 프로그램",
+                        "description": "세부 정보 없음",
+                        "reservation_required": None
+                    })
+                    if len(parsed_programs) >= 7:
+                        break
+
         results.append({
             "name": name,
             "lat": round(lat, 7),
@@ -2317,7 +2378,7 @@ def get_festivals(region: str = "전국 전체", month: Optional[int] = None, *a
             "region": region if region != "전국 전체" else classify_region(address),
             "is_indoor": classify_indoor_outdoor(name, venue),
             "theme": classify_festival_theme(name, venue, desc),
-            "programs": [],
+            "programs": parsed_programs,
             "phone": phone,
             "homepage": homepage
         })
