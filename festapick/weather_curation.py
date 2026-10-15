@@ -741,7 +741,7 @@ def render_weather_festival_curation_page():
                 <div class="header-sub-text">오늘의 하늘 상태와 체감 기온에 딱 맞는 최적의 로컬 축제와 1일 여행 코스를 추천합니다.</div>
             </div>
             <div>
-                <a href="?view=main" style="
+                <a href="?view=main" onclick="try{sessionStorage.removeItem('festapick_active_companion');}catch(e){}" style="
                     display:inline-flex; align-items:center; gap:6px; background:#111827; color:#FFFFFF;
                     font-size:0.85rem; font-weight:700; padding:8px 18px; border-radius:9999px; text-decoration:none;
                 ">

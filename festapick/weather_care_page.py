@@ -1422,7 +1422,7 @@ def render_header_nav():
     st.html("""
     <div class="care-header-bar">
         <div>
-            <a href="?view=main" class="btn-return-home">
+            <a href="?view=main" class="btn-return-home" onclick="try{sessionStorage.removeItem('festapick_active_companion');}catch(e){}">
                 <span>←</span>
                 <span>메인으로 돌아가기</span>
             </a>
@@ -1435,25 +1435,124 @@ def render_header_nav():
     """)
 
 
+def _resolve_sdo_from_param(r_param: str, available_sdos: List[str]) -> Optional[str]:
+    """다양한 형태의 지역명 문자열을 available_sdos(표준 시/도명)로 정규화 매핑"""
+    if not r_param:
+        return None
+    r_clean = str(r_param).strip()
+    if r_clean in available_sdos:
+        return r_clean
+    if r_clean in REGION_SHORT_TO_FULL:
+        mapped = REGION_SHORT_TO_FULL[r_clean]
+        if mapped in available_sdos:
+            return mapped
+    # 2글자 접두사 매칭 (예: '제주' -> '제주특별자치도', '강원' -> '강원특별자치도')
+    for sdo in available_sdos:
+        if r_clean in sdo or sdo.startswith(r_clean[:2]):
+            return sdo
+    return None
+
+
+def _match_festival_option(target_fest: str, options: List[str]) -> Tuple[int, str]:
+    """
+    다양한 형태의 축제명(수식어, 연도, 공백 차이 등)을 축제 옵션 목록 중 가장 적합한 항목으로 스마트 매칭
+    """
+    if not target_fest or not options:
+        return 0, options[0] if options else ""
+
+    t_clean = str(target_fest).strip()
+
+    # 1. 완전 일치 (대소문자 무시)
+    for i, opt in enumerate(options):
+        if t_clean.lower() == opt.lower():
+            return i, opt
+
+    # 2. 단순 포함 관계
+    for i, opt in enumerate(options):
+        if t_clean in opt or opt in t_clean:
+            return i, opt
+
+    # 3. 특수문자, 괄호, 연도 제거 후 정규화 비교
+    import re
+    def normalize_name(s: str) -> str:
+        s = re.sub(r'\[.*?\]|\(.*?\)|202\d', '', s)
+        s = re.sub(r'[\s\W_]+', '', s)
+        return s
+
+    t_norm = normalize_name(t_clean)
+    if t_norm:
+        for i, opt in enumerate(options):
+            o_norm = normalize_name(opt)
+            if t_norm and o_norm and (t_norm in o_norm or o_norm in t_norm):
+                return i, opt
+
+    # 4. 키워드 토큰 교집합 스코어링 매칭 (수식어 제외한 핵심 명사 추출)
+    tokens = [tok for tok in re.split(r'[\s,\'\"·\-~]+', t_clean) if len(tok) >= 2 and tok not in ["축제", "문화", "공연", "2026", "로컬", "안심", "행사", "여정", "힐링"]]
+    if tokens:
+        best_score = 0
+        best_idx = 0
+        for i, opt in enumerate(options):
+            score = sum(1 for tok in tokens if tok in opt)
+            if score > best_score:
+                best_score = score
+                best_idx = i
+        if best_score > 0:
+            return best_idx, options[best_idx]
+
+    return 0, options[0]
+
+
 def render_selector_bar() -> Tuple[str, str, date]:
     """공공데이터 438건 전수 축제 카탈로그 연동 3단계 상단 필터바 ([시/도] -> [상세 축제] -> [날짜])"""
     available_sdos, catalog = load_all_catalog_festivals()
 
-    # 쿼리 파라미터 딥링크 연동 지원
-    if "exp_region" in st.query_params:
-        r_param = st.query_params.get("exp_region")
-        full_sdo = REGION_SHORT_TO_FULL.get(r_param, r_param)
-        if full_sdo in available_sdos:
-            st.session_state.care_selected_sdo = full_sdo
+    # 쿼리 파라미터 딥링크 연동 지원 (w_region, target_region, exp_region, region, sdo 지원)
+    incoming_region = None
+    for r_key in ["w_region", "target_region", "exp_region", "region", "sdo"]:
+        if r_key in st.query_params:
+            val = urllib.parse.unquote(str(st.query_params.get(r_key, "")).strip())
+            if val:
+                incoming_region = val
+                del st.query_params[r_key]
+                break
 
-    if "select_fest_and_go" in st.query_params:
-        f_param = st.query_params.get("select_fest_and_go")
-        if f_param:
-            st.session_state.care_selected_fest = f_param
+    # 쿼리 파라미터 축제 연동 지원 (w_fest, target_fest, select_fest_and_go, fest, festival 지원)
+    incoming_fest = None
+    for f_key in ["w_fest", "target_fest", "select_fest_and_go", "fest", "festival"]:
+        if f_key in st.query_params:
+            val = urllib.parse.unquote(str(st.query_params.get(f_key, "")).strip())
+            if val:
+                incoming_fest = val
+                del st.query_params[f_key]
+                break
+
+    # 만약 축제명만 들어오고 지역명이 없는 경우, 카탈로그 전체에서 축제명이 속한 지역을 자동 탐색
+    if incoming_fest and not incoming_region:
+        for sdo_name, f_list in catalog.items():
+            for f_item in f_list:
+                f_title = f_item.get("title", "")
+                if incoming_fest in f_title or f_title in incoming_fest:
+                    incoming_region = sdo_name
+                    break
+            if incoming_region:
+                break
+
+    # 외부 연동 지역 파라미터가 유효하면 세션 및 위젯 키 동기화
+    if incoming_region:
+        resolved_sdo = _resolve_sdo_from_param(incoming_region, available_sdos)
+        if resolved_sdo:
+            st.session_state.care_selected_sdo = resolved_sdo
+            st.session_state["care_filter_sdo"] = resolved_sdo
+
+    # 외부 연동 축제 파라미터가 유효하면 세션 및 위젯 키 동기화
+    if incoming_fest:
+        st.session_state.care_selected_fest = incoming_fest
+        # 위젯 selectbox가 이전 값을 유지하지 않고 새 축제를 즉시 반영하도록 기존 키 정리
+        st.session_state.pop("care_filter_fest", None)
 
     cur_sdo = st.session_state.get("care_selected_sdo", "서울특별시")
-    if cur_sdo not in available_sdos:
-        cur_sdo = REGION_SHORT_TO_FULL.get(cur_sdo, available_sdos[0])
+    cur_sdo = _resolve_sdo_from_param(cur_sdo, available_sdos) or available_sdos[0]
+    st.session_state.care_selected_sdo = cur_sdo
     sdo_idx = available_sdos.index(cur_sdo) if cur_sdo in available_sdos else 0
 
     with st.container(border=True):
@@ -1485,11 +1584,11 @@ def render_selector_bar() -> Tuple[str, str, date]:
             fest_options = REGION_FESTIVAL_MAP.get(chosen_sdo, ["가을 로컬 축제"])
 
         cur_fest = st.session_state.get("care_selected_fest", fest_options[0] if fest_options else "")
-        fest_idx = 0
-        for i, opt in enumerate(fest_options):
-            if cur_fest and (cur_fest in opt or opt in cur_fest):
-                fest_idx = i
-                break
+        fest_idx, matched_label = _match_festival_option(cur_fest, fest_options)
+
+        # 위젯 세션 키가 없거나 현재 옵션 범위 밖이면 즉시 매칭된 축제명으로 초기화
+        if "care_filter_fest" not in st.session_state or st.session_state["care_filter_fest"] not in fest_options:
+            st.session_state["care_filter_fest"] = matched_label
 
         with col_fest:
             st.markdown('<div class="care-filter-section-title">🎪 축제 & 문화예술행사 선택</div>', unsafe_allow_html=True)

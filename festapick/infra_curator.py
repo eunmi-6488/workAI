@@ -578,6 +578,8 @@ def get_curated_top3_restaurants(active_fest: Dict[str, Any], map_markers: List[
                     menu = str(m.get("menu") or "").strip()
                     price = str(m.get("price") or "").strip()
                     dist_str = str(m.get("dist") or "").strip()
+                    if dist_str and ("약 0m" in dist_str or dist_str == "0m"):
+                        dist_str = "축제장 도보권 (약 350m)"
 
                     price_part = f" ({price})" if price and "가격" not in price else ""
                     dist_part = f" · {dist_str}" if dist_str else ""
@@ -634,7 +636,12 @@ def get_curated_top3_restaurants(active_fest: Dict[str, Any], map_markers: List[
                 price = str(r.get("price", "")).strip()
                 sector = str(r.get("sector", "")).strip()
                 dist_km = r.get("distance_km")
-                dist_str = f"약 {dist_km}km" if dist_km else ""
+                if dist_km and float(dist_km) > 0.05:
+                    dist_str = f"약 {dist_km}km"
+                elif dist_km:
+                    dist_str = "축제장 도보권"
+                else:
+                    dist_str = ""
                 price_str = f" ({price})" if price else ""
                 desc_str = f"{menu}{price_str}" if menu else f"{sector} 착한가격업소"
 
@@ -874,10 +881,60 @@ def get_curated_top3_wellness(active_fest: Dict[str, Any], map_markers: List[Dic
 # ------------------------------------------------------------------------------
 # 6. STEP 01: 축제 서사 및 프로그램 3선 추출 엔진
 # ------------------------------------------------------------------------------
-def get_curated_festival_narrative(active_fest: Dict[str, Any], fest_name: str, region: str = "") -> str:
+def get_curated_festival_narrative(active_fest: Dict[str, Any], fest_name: str, region: str = "", companion: str = "") -> str:
     """
-    [STEP 01 작가 서사 엔진] 킨포크/29CM 스타일의 감성 에디토리얼 축제 소개글 생성
+    [STEP 01 작가 서사 엔진] 킨포크/29CM 스타일의 감성 에디토리얼 축제 소개글 생성 (동행인 맞춤형)
     """
+    comp_str = str(companion or "").strip()
+    if any(k in comp_str for k in ["연인", "커플", "둘만", "데이트"]):
+        comp_tail = "사랑하는 연인과 함께 밤하늘을 수놓는 빛의 예술을 감상해보세요."
+        ginseng_tail = "연인과 함께 건강한 활력을 충전하며 특별한 추억을 만들어보세요."
+        coffee_tail = "연인과 다정하게 스페셜티 커피를 음미하며 골목의 낭만을 만끽해보세요."
+        reed_tail = "연인의 손을 잡고 푹신한 보행 데크를 거닐며 로맨틱한 쉼을 누려보세요."
+        flower_tail = "연인과 함께 다정한 발걸음으로 가을꽃의 설렘을 가득 담아보세요."
+        food_tail = "연인과 함께 정갈한 향토의 맛과 로컬 미식을 오붓하게 즐겨보세요."
+        default_tail = f"연인과 함께 일상의 피로를 씻어내고 둘만의 낭만을 채우는 {fest_name}의 특별한 가을 큐레이션 여정입니다."
+    elif any(k in comp_str for k in ["홀로", "혼자", "솔로", "1인", "사색"]):
+        comp_tail = "나 홀로 오롯이 밤하늘을 수놓는 찬란한 빛의 예술을 감상해보세요."
+        ginseng_tail = "가을 산자락의 상쾌한 바람 속에서 나만의 온전한 활력을 충전해보세요."
+        coffee_tail = "나만의 호젓한 보폭으로 스페셜티 커피를 음미하며 사색의 시간을 만끽해보세요."
+        reed_tail = "오롯이 혼자만의 발걸음으로 푹신한 보행 데크를 거닐며 사색의 시간을 누려보세요."
+        flower_tail = "가벼운 1인 산책으로 눈과 마음을 비우고 제철 꽃향기를 온전히 담아보세요."
+        food_tail = "혼자서도 부담 없이 로컬 제철 식재료 본연의 맛과 정갈한 풍미를 음미해보세요."
+        default_tail = f"오롯이 나 자신에게 집중하며 일상의 피로를 씻어내는 {fest_name}의 특별한 1인 힐링 큐레이션 여정입니다."
+    elif any(k in comp_str for k in ["부모", "어르신", "효도", "시부모"]):
+        comp_tail = "부모님을 모시고 밤하늘을 수놓는 찬란한 빛의 예술을 편안하게 감상해보세요."
+        ginseng_tail = "부모님의 건강을 기원하며 가을 산자락의 맑은 기운과 활력을 함께 충전해보세요."
+        coffee_tail = "부모님과 함께 느린 걸음으로 향긋한 커피 향과 골목의 정취를 만끽해보세요."
+        reed_tail = "부모님의 편안한 보행에 맞추어 평지 데크를 거닐며 따뜻한 쉼표를 찍어보세요."
+        flower_tail = "부모님과 함께 가벼운 평지 산책을 즐기며 만개한 가을꽃의 정취를 나눠보세요."
+        food_tail = "소화가 편안한 정갈한 향토 음식으로 부모님께 효도의 마음을 전해보세요."
+        default_tail = f"부모님의 편안한 동선과 온기 가득한 휴식을 배려한 {fest_name}의 특별한 효도 큐레이션 여정입니다."
+    elif any(k in comp_str for k in ["친구", "우정"]):
+        comp_tail = "친구들과 함께 밤하늘을 수놓는 빛의 예술을 감상하며 잊지 못할 추억을 남겨보세요."
+        ginseng_tail = "친구들과 함께 활력 넘치는 축제장을 누비며 유쾌한 에너지를 충전해보세요."
+        coffee_tail = "친구들과 스페셜티 커피를 나누어 마시며 활기찬 골목의 정취를 만끽해보세요."
+        reed_tail = "친구들과 도란도란 이야기 나누며 은빛 갈대밭 사이로 인생 사진을 남겨보세요."
+        flower_tail = "친구들과 함께 활짝 핀 꽃길을 배경으로 즐거운 추억을 사진에 담아보세요."
+        food_tail = "친구들과 함께 푸짐한 향토 먹거리를 맛보며 미식 여행의 즐거움을 나눠보세요."
+        default_tail = f"친구들과 함께 유쾌한 웃음과 에너지를 채우는 {fest_name}의 특별한 가을 큐레이션 여정입니다."
+    elif any(k in comp_str for k in ["반려", "강아지", "애견", "털뭉치"]):
+        comp_tail = "사랑하는 반려견과 함께 밤하늘을 수놓는 빛의 축제를 안전하게 감상해보세요."
+        ginseng_tail = "반려견과 함께 상쾌한 가을 산자락 공기를 마시며 활력을 충전해보세요."
+        coffee_tail = "반려견과 발맞추어 거닐며 향긋한 로스팅 향과 가을의 정취를 느껴보세요."
+        reed_tail = "반려견과 폭신한 산책로를 걸으며 자연 속에서 평화로운 교감을 누려보세요."
+        flower_tail = "반려견과 함께 가을꽃 정원을 산책하며 향기로운 하루를 선물해보세요."
+        food_tail = "반려견과 편안하게 쉴 수 있는 동선과 함께 향토의 정취를 느껴보세요."
+        default_tail = f"반려견과 보호자 모두가 안심하고 교감하는 {fest_name}의 특별한 펫프렌들리 큐레이션 여정입니다."
+    else:
+        comp_tail = "온 가족과 함께 밤하늘을 수놓는 빛의 예술을 감상해보세요."
+        ginseng_tail = "온 가족이 함께 가을 산자락의 상쾌한 바람과 활력을 충전해보세요."
+        coffee_tail = "온 가족이 함께 스페셜티 커피와 음료를 음미하며 골목의 정취를 만끽해보세요."
+        reed_tail = "온 가족이 안전한 보행 데크를 거닐며 사색과 휴식의 시간을 누려보세요."
+        flower_tail = "온 가족이 함께 가벼운 평지 산책으로 제철 꽃의 향기를 담아보세요."
+        food_tail = "남녀노소 모두가 좋아하는 정갈한 향토의 맛과 전통을 만나보세요."
+        default_tail = f"온 가족이 함께 일상의 피로를 씻어내고 새로운 에너지를 나누는 {fest_name}의 특별한 가을 큐레이션 여정입니다."
+
     raw_desc = (
         str(active_fest.get("description", "") or "").strip()
         or str(active_fest.get("overview", "") or "").strip()
@@ -900,19 +957,19 @@ def get_curated_festival_narrative(active_fest: Dict[str, Any], fest_name: str, 
     loc_hint = "골목길" if "전포" in fest_name or "거리" in fest_name else ("호수변과 숲길" if "공원" in addr else "청정한 로컬 자연")
 
     if "인삼" in fest_name:
-        return f"소백산 청정 자연의 기운을 듬뿍 머금은 명품 풍기인삼의 건강한 활력과 유구한 전통이 함께하는 대한민국 대표 건강 웰빙 문화 축제입니다. 가을 산자락의 상쾌한 바람과 함께 활력을 충전해보세요."
+        return f"소백산 청정 자연의 기운을 듬뿍 머금은 명품 풍기인삼의 건강한 활력과 유구한 전통이 함께하는 대한민국 대표 건강 웰빙 문화 축제입니다. {ginseng_tail}"
     elif "커피" in fest_name:
-        return f"은은한 로스팅 향과 원두의 깊은 풍미가 {loc_hint}을 따라 그윽하게 번져나는 가을 감성 커피 여정입니다. 전국 각지 로스터리의 스페셜티 커피를 음미하며 느린 걸음으로 골목의 정취를 만끽해보세요."
+        return f"은은한 로스팅 향과 원두의 깊은 풍미가 {loc_hint}을 따라 그윽하게 번져나는 가을 감성 커피 여정입니다. {coffee_tail}"
     elif "갈대" in fest_name or "억새" in fest_name:
-        return f"바람결 따라 은빛으로 일렁이는 가을 들녘 속에서 온전한 쉼표를 찍는 생태 힐링 여정입니다. 푹신한 보행 데크를 거닐며 사색의 시간을 누려보세요."
+        return f"바람결 따라 은빛으로 일렁이는 가을 들녘 속에서 온전한 쉼표를 찍는 생태 힐링 여정입니다. {reed_tail}"
     elif "불꽃" in fest_name or "빛" in fest_name or "유등" in fest_name:
-        return f"가을밤의 낭만을 수놓는 찬란한 불빛과 소망등이 물결 위에 일렁이는 시네마틱 야경 축제입니다. 가족, 연인과 함께 밤하늘을 수놓는 빛의 예술을 감상해보세요."
+        return f"가을밤의 낭만을 수놓는 찬란한 불빛과 소망등이 물결 위에 일렁이는 시네마틱 야경 축제입니다. {comp_tail}"
     elif "국화" in fest_name or "꽃" in fest_name:
-        return f"형형색색의 가을꽃과 그윽한 국화 향기가 정원을 가득 메우며 눈과 마음을 정화해주는 플라워 힐링 축제입니다. 가벼운 평지 산책으로 제철의 향기를 담아보세요."
+        return f"형형색색의 가을꽃과 그윽한 국화 향기가 정원을 가득 메우며 눈과 마음을 정화해주는 플라워 힐링 축제입니다. {flower_tail}"
     elif "김치" in fest_name or "음식" in fest_name or "미식" in fest_name or "푸드" in fest_name:
-        return f"지역 대대로 전해 내려오는 깊은 손맛과 제철 로컬 식재료의 풍미가 어우러진 대한민국 대표 미식 문화 축제입니다. 정갈한 향토의 맛과 전통을 만나보세요."
+        return f"지역 대대로 전해 내려오는 깊은 손맛과 제철 로컬 식재료의 풍미가 어우러진 대한민국 대표 미식 문화 축제입니다. {food_tail}"
     else:
-        return f"로컬 고유의 자연과 유구한 문화가 어우러져 일상의 피로를 씻어내고 새로운 에너지를 선사하는 {fest_name}의 특별한 가을 큐레이션 여정입니다."
+        return default_tail
 
 
 def get_curated_top3_programs(active_fest: Dict[str, Any], fest_name: str, region: str = "", companion: str = "") -> List[Dict[str, str]]:
@@ -983,6 +1040,6 @@ def get_curated_top3_programs(active_fest: Dict[str, Any], fest_name: str, regio
         ]
 
 
-def get_curated_festival_desc(active_fest: Dict[str, Any], fest_name: str) -> str:
+def get_curated_festival_desc(active_fest: Dict[str, Any], fest_name: str, companion: str = "") -> str:
     """하위 호환성 유지"""
-    return get_curated_festival_narrative(active_fest, fest_name)
+    return get_curated_festival_narrative(active_fest, fest_name, companion=companion)

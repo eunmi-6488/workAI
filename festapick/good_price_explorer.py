@@ -1217,7 +1217,7 @@ def render_good_price_explorer_page():
                 <p class="editorial-lead-text">바가지 없는 안심 로컬 미식 — 주요 축제장 및 문화명소 인근 착한가격 모범식당 큐레이션</p>
             </div>
             <div class="editorial-header-actions">
-                <a href="?view=main" class="editorial-ghost-btn">
+                <a href="?view=main" class="editorial-ghost-btn" onclick="try{sessionStorage.removeItem('festapick_active_companion');}catch(e){}">
                     <span>←</span>
                     <span>홈으로</span>
                 </a>

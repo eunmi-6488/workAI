@@ -2699,6 +2699,9 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"연인과 함께", "부모님과 함께"),
             (r"두 사람이 함께", "부모님과 함께"),
             (r"두 사람이", "부모님과 함께"),
+            (r"가족,\s*연인과\s*함께", "사랑하는 부모님과 함께"),
+            (r"가족이나\s*연인과\s*함께", "부모님과 함께"),
+            (r"가족,\s*연인", "부모님"),
             (r"친구들과 함께", "부모님과 함께"),
             (r"친구들과", "부모님과"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 평지 안심 동선으로, 부모님과 함께하는 효도 힐링의 여정을 안내해 드리겠습니다"),
@@ -2761,7 +2764,8 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"연인과 함께하는", "온 가족이 함께하는"),
             (r"연인과 함께", "온 가족과 함께"),
             (r"두 사람이 함께", "온 가족이 함께"),
-            (r"두 사람이", "온 가족이"),
+            (r"가족,\s*연인과\s*함께", "온 가족과 함께"),
+            (r"가족이나\s*연인과\s*함께", "온 가족과 함께"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 안심 유모차 동선으로, 온 가족이 함께하는 패밀리 힐링의 여정을 안내해 드리겠습니다"),
         ]
         for pat, rep in replacements:
@@ -2805,7 +2809,9 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"나홀로", "둘만의"),
             (r"나만의", "둘만의"),
             (r"나를 위한", "연인을 위한"),
-            (r"나에게", "두 사람에게"),
+            (r"가족,\s*연인과\s*함께", "사랑하는 연인과 함께"),
+            (r"가족이나\s*연인과\s*함께", "사랑하는 연인과 함께"),
+            (r"가족,\s*연인", "사랑하는 연인"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 낭만적인 동선으로, 연인과 함께하는 로맨틱 힐링의 여정을 안내해 드리겠습니다"),
         ]
         for pat, rep in replacements:
@@ -2836,7 +2842,9 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"나홀로", "친구들과 함께"),
             (r"나만의", "우리들의"),
             (r"나를 위한", "친구들을 위한"),
-            (r"나에게", "우리 친구들에게"),
+            (r"가족,\s*연인과\s*함께", "소중한 친구들과 함께"),
+            (r"가족이나\s*연인과\s*함께", "친구들과 함께"),
+            (r"가족,\s*연인", "소중한 친구들"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 활기찬 동선으로, 친구들과 함께하는 우정 힐링의 여정을 안내해 드리겠습니다"),
         ]
         for pat, rep in replacements:
@@ -2866,7 +2874,9 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"나홀로", "반려견과"),
             (r"나만의", "우리 댕댕이와의"),
             (r"나를 위한", "반려동물을 위한"),
-            (r"나에게", "반려견과 나에게"),
+            (r"가족,\s*연인과\s*함께", "사랑하는 반려견과 함께"),
+            (r"가족이나\s*연인과\s*함께", "반려견과 함께"),
+            (r"가족,\s*연인", "사랑하는 반려견"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 폭신한 산책로로, 반려견과 함께하는 펫프렌들리 힐링의 여정을 안내해 드리겠습니다"),
         ]
         for pat, rep in replacements:
@@ -2898,7 +2908,11 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
             (r"두 사람이", "홀로"),
             (r"패밀리 좌석", "아늑한 1인 좌석"),
             (r"패밀리 힐링", "사색 힐링"),
-            (r"어르신들의 소화에도 더없이 좋습니다", "혼자서도 부담 없이 속 편하게 즐기기 좋습니다"),
+            (r"가족,\s*연인과\s*함께", "나 홀로 오롯이"),
+            (r"가족이나\s*연인과\s*함께", "나 홀로 오롯이"),
+            (r"가족과\s*연인과\s*함께", "나 홀로 오롯이"),
+            (r"가족,\s*연인", "홀로 떠난 여행자"),
+            (r"가족과\s*연인", "홀로 떠난 여행자"),
             (r"오늘은 편안한 주차와 안전한 동선으로,?\s*[^,\n]+[와과] 함께하는 힐링의 여정을 안내해 드리겠습니다", "오늘은 편안한 주차와 호젓한 동선으로, 나 홀로 떠나는 사색의 여정을 안내해 드리겠습니다"),
         ]
         for pat, rep in replacements:
@@ -2907,7 +2921,7 @@ def harmonize_report_to_companion(article_content: str, target_companion: str, f
     return text
 
 
-def render_curated_article_report(article_content: str, target_companion: str = "", fest_name: str = "") -> str:
+def render_curated_article_report(article_content: str, target_companion: str = "", fest_name: str = "", fest_region: str = "") -> str:
     """
     AI 에디터 상세 분석 리포트 전문 렌더러 (타이포그래피 및 위계 개선)
     - 동행인 선택에 맞춰 리포트 내 텍스트를 100% 자동 동기화(harmonize_report_to_companion)
@@ -3307,12 +3321,21 @@ def render_curated_article_report(article_content: str, target_companion: str = 
     html_out = [report_custom_css, '<div class="report-wrapper">']
 
     # 상단 퀵 액션 툴바: Home 및 Weather 버튼 (마크다운 인덴트 코드블록 오작동 방지를 위해 들여쓰기 공백 제거)
+    weather_href = "?view=weather"
+    if fest_name:
+        params = [("view", "weather"), ("w_fest", str(fest_name).strip())]
+        if fest_region:
+            params.append(("w_region", str(fest_region).strip()))
+        if target_companion:
+            params.append(("companion", str(target_companion).strip()))
+        weather_href = f"?{urllib.parse.urlencode(params)}"
+
     html_out.append(
         '<div class="report-action-toolbar">'
-        '<a href="?view=main" target="_self" class="report-tool-btn report-btn-home">'
+        '<a href="?view=main" target="_self" class="report-tool-btn report-btn-home" onclick="try{sessionStorage.removeItem(\'festapick_active_companion\');}catch(e){}">'
         '<span class="tool-icon">🏠</span><span class="tool-text">Home 메인으로</span>'
         '</a>'
-        '<a href="?view=weather" target="_self" class="report-tool-btn report-btn-weather">'
+        f'<a href="{html.escape(weather_href)}" target="_self" class="report-tool-btn report-btn-weather">'
         '<span class="tool-icon">🌤️</span><span class="tool-text">Weather 날씨 케어</span>'
         '</a>'
         '</div>'
@@ -3368,16 +3391,17 @@ def render_curated_article_report(article_content: str, target_companion: str = 
                 if not clean_l:
                     continue
 
-                # 유연하고 견고한 시간 패턴 매칭 (콜론 유무, ** 마크다운, 공백 등 모두 허용)
+                # 유연하고 견고한 시간 패턴 매칭 (중복 불릿, 마크다운 기호, 공백 등 모두 허용)
                 time_match = re.match(
-                    r'^[-*•]?\s*(?:\*\*)?\s*(\d{1,2}:\d{2}(?:\s*(?:AM|PM|am|pm))?|(?:오전|오후)\s*\d{1,2}(?:시|:\d{2})?|\d{1,2}\s*(?:AM|PM|am|pm))\s*(?:\*\*)?\s*[:：\-~|]?\s*(.*)$',
+                    r'^[-*•\s\t#]*?(?:\*\*)?\s*(\d{1,2}:\d{2}(?:\s*(?:AM|PM|am|pm))?|(?:오전|오후)\s*\d{1,2}(?:시|:\d{2})?|\d{1,2}\s*(?:AM|PM|am|pm))\s*(?:\*\*)?\s*[:：\-~|]?\s*(.*)$',
                     clean_l,
                     re.IGNORECASE
                 )
                 if time_match:
                     t_badge = time_match.group(1).strip()
                     t_desc = time_match.group(2).strip()
-                    # 잔여 마크다운 볼드 기호 정리
+                    # 선행 잔여 특수기호 및 마크다운 정리
+                    t_desc = re.sub(r'^[-*•:：\s]+', '', t_desc)
                     t_desc = re.sub(r'^\*\*\s*', '', t_desc)
                     t_desc = re.sub(r'\s*\*\*$', '', t_desc)
                     card_html = f'<div class="report-timeline-card"><span class="report-time-badge">{inline_format(t_badge)}</span><span class="report-timeline-desc">{inline_format(t_desc)}</span></div>'
@@ -3417,6 +3441,56 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# [전역 스크롤 포커스 가디언] 리렌더링 및 상태 변경 시 최상단 튕김 현상 100% 원천 방어
+st.html("""
+<script>
+(function() {
+    if (window.__festapick_scroll_guardian_installed) return;
+    window.__festapick_scroll_guardian_installed = true;
+
+    function recordCurrentScroll() {
+        try {
+            if (window.scrollY > 20) {
+                sessionStorage.setItem('festapick_last_scroll_y', String(window.scrollY));
+            }
+        } catch(e) {}
+    }
+
+    window.addEventListener('scroll', recordCurrentScroll, { passive: true });
+    window.addEventListener('beforeunload', recordCurrentScroll);
+
+    function restoreScrollGuardian() {
+        try {
+            var anchor = sessionStorage.getItem('festapick_scroll_anchor');
+            if (anchor) {
+                var el = document.getElementById(anchor);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    sessionStorage.removeItem('festapick_scroll_anchor');
+                    sessionStorage.removeItem('festapick_last_scroll_y');
+                    return;
+                }
+            }
+            var savedY = sessionStorage.getItem('festapick_last_scroll_y');
+            if (savedY && parseInt(savedY, 10) > 20) {
+                window.scrollTo({ top: parseInt(savedY, 10), behavior: 'auto' });
+                sessionStorage.removeItem('festapick_last_scroll_y');
+            }
+        } catch(e) {}
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restoreScrollGuardian);
+    } else {
+        restoreScrollGuardian();
+    }
+    setTimeout(restoreScrollGuardian, 40);
+    setTimeout(restoreScrollGuardian, 150);
+    setTimeout(restoreScrollGuardian, 400);
+})();
+</script>
+""", unsafe_allow_javascript=True)
 
 
 # ==============================================================================
@@ -3698,9 +3772,9 @@ def execute_curated_editorial_flow(f_target: str, q_region: str = "", companion:
         st.toast(f"🗞️ '{fest_obj['title']}' 맞춤 에세이 & 안심 지도가 준비되었습니다!", icon="✨")
 
 # ------------------------------------------------------------------------------
-# 쿼리 파라미터 최우선 연동 (select_fest_and_go 직통 에세이 발행)
+# 쿼리 파라미터 최우선 연동 (select_fest_and_go 직통 에세이 발행 - weather 뷰 진입 시 제외)
 # ------------------------------------------------------------------------------
-if "select_fest_and_go" in st.query_params:
+if "select_fest_and_go" in st.query_params and st.query_params.get("view") != "weather":
     f_target = urllib.parse.unquote(str(st.query_params.get("select_fest_and_go", "")).strip())
     q_region = urllib.parse.unquote(str(st.query_params.get("target_region", "")).strip())
     del st.query_params["select_fest_and_go"]
@@ -3753,11 +3827,12 @@ if "companion" in st.query_params:
         st.session_state["main_companion"] = None
 
 # [메인 화면 복귀 및 최초 진입 시 동행인 자동 초기화 가드]
-# 상세 페이지에서 메인으로 복귀할 때 사용자가 명시적으로 companion 파라미터를 유지한 경우가 아닐 때만 초기화
+# 상세 페이지에서 메인으로 복귀하거나 메인 뷰 진입 시, 명시적인 companion 파라미터가 없으면 완전 초기화
 is_returning_to_main = (
     "companion" not in st.query_params and (
-        (target_view == "main" and prev_view is not None and prev_view != "main") or
-        (target_view is None and prev_view is not None and prev_view != "main" and st.session_state.get("view_mode") == "main")
+        target_view == "main" or
+        (target_view is None and st.session_state.get("view_mode") == "main") or
+        (prev_view is not None and prev_view != "main")
     )
 )
 
@@ -3777,13 +3852,19 @@ if "view" in st.query_params:
             st.session_state.pop("curation_result", None)
             st.session_state.pop("active_fest", None)
             st.session_state.pop("report_expander", None)
-            if "companion" not in st.query_params:
-                st.session_state.companion = None
-                st.session_state["active_companion_param"] = "none"
-                st.session_state["active_companion"] = None
-                st.session_state["main_companion"] = None
-    del st.query_params["view"]
-    need_cal_rerun = True
+            st.session_state.companion = None
+            st.session_state["active_companion_param"] = "none"
+            st.session_state["active_companion"] = None
+            st.session_state["main_companion"] = None
+            if "companion" in st.query_params:
+                del st.query_params["companion"]
+            del st.query_params["view"]
+            need_cal_rerun = True
+        else:
+            # 상세 인터랙티브 뷰("calendar", "course", "restaurant", "weather", "shelter")는
+            # query_params에 view를 온전히 보존하여 서브 인터랙션(탭 전환, 검색, 새로고침) 시
+            # 메인 페이지로 잘못 튕기는 현상을 원천 방지하고 곧바로 렌더링하도록 직행
+            need_cal_rerun = False
 
 if "cal_genre" in st.query_params:
     st.session_state.view_mode = "calendar"
@@ -5395,7 +5476,7 @@ def render_calendar_full_page():
     <div class="cal-full-container">
         <!-- 상단 네비게이션 & 헤더 -->
         <div class="cal-top-nav">
-            <a href="?view=main" target="_self" class="btn-back-to-home">
+            <a href="?view=main" target="_self" class="btn-back-to-home" onclick="try{{sessionStorage.removeItem('festapick_active_companion');}}catch(e){{}}">
                 ← 메인으로 돌아가기
             </a>
             <div style="font-size: 13px; font-weight: 700; color: #3A674F;">
@@ -5511,8 +5592,8 @@ elif st.session_state.get("view_mode") == "shelter":
     shelter_explorer.render_shelter_explorer_page()
 
 else:
-    # [메인 매거진 뷰 진입 가드] 다른 상세 페이지에서 복귀 시 companion 완전 초기화 확정
-    if st.session_state.get("_prev_view_mode") != "main" and "companion" not in st.query_params:
+    # [메인 매거진 뷰 진입 가드] 메인 홈 진입 시 URL에 companion 파라미터가 없으면 깨끗하게 초기화
+    if "companion" not in st.query_params:
         st.session_state.companion = None
         st.session_state["active_companion_param"] = "none"
         st.session_state["active_companion"] = None
@@ -6594,9 +6675,14 @@ else:
             except Exception:
                 pass
 
-        # 1. 축제 실제 작가 서사 및 대표 프로그램 3선 (구버전 캐시 호환 방어)
-        fest_real_desc = get_curated_festival_narrative(active_fest, fest_name, fest_region)
-        active_comp = str(st.session_state.get('active_companion', ''))
+        # 1. 축제 실제 작가 서사 및 대표 프로그램 3선 (동행인 완전 맞춤형 동기화)
+        active_comp = str(st.session_state.get('active_companion', '') or st.session_state.get('companion', '') or st.session_state.get('main_companion', '') or '').strip()
+        try:
+            fest_real_desc = get_curated_festival_narrative(active_fest, fest_name, fest_region, companion=active_comp)
+        except TypeError:
+            fest_real_desc = get_curated_festival_narrative(active_fest, fest_name, fest_region)
+        fest_real_desc = harmonize_report_to_companion(fest_real_desc, active_comp, fest_name, fest_region)
+
         try:
             top3_programs = get_curated_top3_programs(active_fest, fest_name, fest_region, companion=active_comp) or []
         except TypeError:
@@ -7005,15 +7091,21 @@ else:
                     sync_slot_line = f"- 11:40 AM: 행정안전부 지정 착한가격업소 '{sync_rest_name}'에서 {sync_menu} 점심 식사 ({clean_dist})"
                     
                     # 점심 슬롯 정규식 (선행 불릿/볼드 및 후속 1줄 설명문까지 깨끗하게 단일 슬롯으로 통합 치환)
-                    slot_pattern = r'(?m)^[-*•]?\s*(?:\*\*)?\s*(?:11:[0-5]\d|12:[0-5]\d|01:[0-5]\d|오전\s*11|오후\s*12|오후\s*1)\s*(?:AM|PM)?\s*(?:\*\*)?.*?(?:점심|식사|식당|착한가격|밥상|스넥|찌개|불고기|국밥|돈가스|칼국수).*$(?:\n(?!\s*[-*•]?\s*(?:\*\*)?(?:\d{1,2}:\d{2}|오전|오후|###)).*)*'
+                    slot_pattern = r'(?m)^[-*•\s]*(?:\*\*)?\s*(?:11:[0-5]\d|12:[0-5]\d|01:[0-5]\d|오전\s*11|오후\s*12|오후\s*1)\s*(?:AM|PM)?\s*(?:\*\*)?.*?(?:점심|식사|식당|착한가격|밥상|스넥|찌개|불고기|국밥|돈가스|칼국수).*$(?:\n(?!\s*[-*•\s]*(?:\*\*)?(?:\d{1,2}:\d{2}|오전|오후|###)).*)*'
                     if re.search(slot_pattern, article_content):
                         article_content = re.sub(slot_pattern, sync_slot_line, article_content, count=1)
 
                 # [동행인 정합성 완전 자동 연결] 리포트 전문의 모든 동행인 키워드를 실시간 동행인으로 100% 자동 일치
                 article_content = harmonize_report_to_companion(article_content, current_companion, fest_name, fest_region)
 
+                # [날씨 상세 화면과 100% 동일 장소 동기화 보장]
+                if fest_name:
+                    st.session_state["care_selected_fest"] = fest_name
+                if fest_region:
+                    st.session_state["care_selected_sdo"] = fest_region
+
                 with st.expander('📄 AI 에디터 상세 분석 리포트 전문 확인', expanded=False, key='report_expander', on_change='rerun'):
-                    formatted_report_html = render_curated_article_report(article_content, target_companion=current_companion, fest_name=fest_name)
+                    formatted_report_html = render_curated_article_report(article_content, target_companion=current_companion, fest_name=fest_name, fest_region=fest_region)
                     if formatted_report_html:
                         st.markdown(formatted_report_html, unsafe_allow_html=True)
                     else:
@@ -7554,6 +7646,10 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                 if st.button("🏠 홈으로 가기 (다른 축제 둘러보기)", key="btn_go_home_curation", use_container_width=True):
                     st.session_state.curation_result = None
                     st.session_state.active_fest = None
+                    st.session_state.companion = None
+                    st.session_state["active_companion_param"] = "none"
+                    st.session_state["active_companion"] = None
+                    st.session_state["main_companion"] = None
                     st.session_state.pop("curation_result", None)
                     st.session_state.pop("active_fest", None)
                     st.session_state.pop("report_expander", None)
@@ -8584,14 +8680,14 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                 return "pet"
             return "none"
 
-        curr_companion = st.session_state.get("companion") or st.query_params.get("companion")
-        init_comp = resolve_companion_key(curr_companion)
-
-        is_solo = (init_comp == "solo")
-        is_parents = (init_comp == "parents")
-        is_family = (init_comp == "family")
-        is_couple = (init_comp == "couple")
-        is_pet = (init_comp == "pet")
+        # [홈 화면 진입/복귀 시 알약 미선택 보장]
+        # 사용자가 홈 화면으로 돌아왔을 때는 알약에 아무런 체킹(선택)도 되지 않은 깨끗한 기본 상태로 렌더링
+        init_comp = "none"
+        is_solo = False
+        is_parents = False
+        is_family = False
+        is_couple = False
+        is_pet = False
 
         def _chip_inline_style(is_active: bool) -> str:
             if is_active:
@@ -8611,6 +8707,7 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
             box-shadow: 0 4px 20px rgba(1, 45, 29, 0.04);
             user-select: none;
             position: relative;
+            scroll-margin-top: 50px;
         }}
 
         .comp-radio {{
@@ -8819,87 +8916,15 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
             font-weight: 800;
         }}
 
-        /* [초기 상태: 서브 뱃지 완전 숨김 (None State - 완전 공백 유지)] */
-        .quick-item-tip {{
-            display: none !important;
-            opacity: 0;
-            margin-top: 8px;
-            font-size: 11.5px;
-            font-weight: 600;
-            color: #065F46;
-            background: rgba(6, 95, 70, 0.08);
-            border: 1px solid rgba(6, 95, 70, 0.16);
-            border-radius: 12px;
-            padding: 4px 10px;
-            line-height: 1.35;
-            text-align: center;
-            max-width: 155px;
-            box-shadow: 0 1px 4px rgba(6, 95, 70, 0.05);
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            box-sizing: border-box;
-            transform: translateY(-4px);
-        }}
-
-        /* [동행인 칩 클릭 시에만 비로소 서브 뱃지 등장 (Dynamic Appearance)] */
-        .quick-concierge-section:has(#copt_solo:checked) .quick-item-tip,
-        .quick-concierge-section:has(#copt_parents:checked) .quick-item-tip,
-        .quick-concierge-section:has(#copt_family:checked) .quick-item-tip,
-        .quick-concierge-section:has(#copt_couple:checked) .quick-item-tip,
-        .quick-concierge-section:has(#copt_pet:checked) .quick-item-tip,
-        .quick-concierge-section[data-active="solo"] .quick-item-tip,
-        .quick-concierge-section[data-active="parents"] .quick-item-tip,
-        .quick-concierge-section[data-active="family"] .quick-item-tip,
-        .quick-concierge-section[data-active="couple"] .quick-item-tip,
-        .quick-concierge-section[data-active="pet"] .quick-item-tip {{
-            display: inline-flex !important;
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-            animation: tipFadeSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }}
-
-        .quick-concierge-section:has(.comp-radio-active:checked) .quick-menu-item:hover .quick-item-tip,
-        .quick-concierge-section:not([data-active="none"]) .quick-menu-item:hover .quick-item-tip {{
-            background: rgba(6, 95, 70, 0.14);
-            border-color: rgba(6, 95, 70, 0.32);
-        }}
-
-        /* [개별 동행인 문구 슬롯 및 트랜지션] */
+        /* [동그라미 하단 가이드 문구 영구 비노출 보장] */
+        .quick-item-tip,
         .tip-msg {{
             display: none !important;
-            opacity: 0;
-            white-space: nowrap;
-            font-size: 11.5px;
-            font-weight: 600;
-            color: #065F46;
-            line-height: 1.35;
-        }}
-
-        /* [선택된 동행인 문구 활성화] */
-        .quick-concierge-section:has(#copt_solo:checked) .msg-solo,
-        .quick-concierge-section[data-active="solo"] .msg-solo,
-        .quick-concierge-section:has(#copt_parents:checked) .msg-parents,
-        .quick-concierge-section[data-active="parents"] .msg-parents,
-        .quick-concierge-section:has(#copt_family:checked) .msg-family,
-        .quick-concierge-section[data-active="family"] .msg-family,
-        .quick-concierge-section:has(#copt_couple:checked) .msg-couple,
-        .quick-concierge-section[data-active="couple"] .msg-couple,
-        .quick-concierge-section:has(#copt_pet:checked) .msg-pet,
-        .quick-concierge-section[data-active="pet"] .msg-pet {{
-            display: inline-block !important;
-            opacity: 1 !important;
-        }}
-
-        @keyframes tipFadeSlide {{
-            0% {{
-                opacity: 0;
-                transform: translateY(4px);
-            }}
-            100% {{
-                opacity: 1;
-                transform: translateY(0);
-            }}
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }}
 
         /* 하이라이트 뱃지 */
@@ -9150,7 +9175,7 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                 </label>
             </div>
 
-            <!-- 5개 원형 아이콘 버튼 및 동행인 맞춤형 가이드 텍스트 -->
+            <!-- 5개 원형 아이콘 버튼 (가이드 문구 없이 깔끔한 디자인) -->
             <div class="quick-menu-grid">
                 <!-- 1. 지역축제 달력 -->
                 <a href="?view=calendar" target="_self" class="quick-menu-item">
@@ -9159,13 +9184,6 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         <span class="badge-nav-dot">VIEW</span>
                     </div>
                     <div class="quick-item-label">지역축제 달력</div>
-                    <div class="quick-item-tip">
-                        <span class="tip-msg msg-solo">혼잡도 낮은 슬로우 감성 일정</span>
-                        <span class="tip-msg msg-parents">여유롭고 완만한 힐링 축제 일정</span>
-                        <span class="tip-msg msg-family">체험과 볼거리 풍성한 가족 축제</span>
-                        <span class="tip-msg msg-couple">노을과 야경이 예쁜 로맨틱 축제</span>
-                        <span class="tip-msg msg-pet">펫프렌들리 야외 로컬 축제</span>
-                    </div>
                 </a>
 
                 <!-- 2. 쉼표 여정 -->
@@ -9175,13 +9193,6 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         <span class="badge-nav-dot">VIEW</span>
                     </div>
                     <div class="quick-item-label">쉼표 여정</div>
-                    <div class="quick-item-tip">
-                        <span class="tip-msg msg-solo">취향 따라 머무는 1인 감성 여정</span>
-                        <span class="tip-msg msg-parents">단차 없는 편안한 효도 산책 코스</span>
-                        <span class="tip-msg msg-family">유모차도 거뜬한 안심 피크닉 동선</span>
-                        <span class="tip-msg msg-couple">손잡고 걷는 낭만 가득 데이트 로드</span>
-                        <span class="tip-msg msg-pet">반려견과 발맞추는 펫 산책로</span>
-                    </div>
                 </a>
 
                 <!-- 3. 착한가격 식당 -->
@@ -9191,13 +9202,6 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         <span class="badge-nav-dot">VIEW</span>
                     </div>
                     <div class="quick-item-label">착한가격 식당</div>
-                    <div class="quick-item-tip">
-                        <span class="tip-msg msg-solo">부담 없는 1인 혼밥 착한 밥상</span>
-                        <span class="tip-msg msg-parents">속 편하고 정갈한 로컬 한식 밥상</span>
-                        <span class="tip-msg msg-family">자극 없이 맛있는 가족 안심 먹거리</span>
-                        <span class="tip-msg msg-couple">분위기 좋은 가성비 로컬 맛집</span>
-                        <span class="tip-msg msg-pet">야외 테라스 착한 먹거리 쉼터</span>
-                    </div>
                 </a>
 
                 <!-- 4. 날씨확인 -->
@@ -9207,13 +9211,6 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         <span class="badge-nav-dot">VIEW</span>
                     </div>
                     <div class="quick-item-label">날씨확인</div>
-                    <div class="quick-item-tip">
-                        <span class="tip-msg msg-solo">쾌청한 날씨 속 나만의 쉼표</span>
-                        <span class="tip-msg msg-parents">일교차와 바람 안심 케어</span>
-                        <span class="tip-msg msg-family">야외 나들이 자외선/바람 체크</span>
-                        <span class="tip-msg msg-couple">인생샷 건지기 좋은 골든아워</span>
-                        <span class="tip-msg msg-pet">지면 열기 없는 산뜻한 산책 날씨</span>
-                    </div>
                 </a>
 
                 <!-- 5. 안심쉼터 -->
@@ -9223,13 +9220,6 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         <span class="badge-nav-dot">VIEW</span>
                     </div>
                     <div class="quick-item-label">안심쉼터</div>
-                    <div class="quick-item-tip">
-                        <span class="tip-msg msg-solo">조용히 멍때리기 좋은 쉼터</span>
-                        <span class="tip-msg msg-parents">다리 뻗고 쉬기 좋은 그늘 쉼터</span>
-                        <span class="tip-msg msg-family">아이들이 안전한 잔디 쉼터</span>
-                        <span class="tip-msg msg-couple">둘만의 오붓한 뷰포인트 쉼터</span>
-                        <span class="tip-msg msg-pet">반려견과 함께 숨 돌리는 흙길 쉼터</span>
-                    </div>
                 </a>
             </div>
 
@@ -9266,10 +9256,10 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         if (targetRadio) {{
                             targetRadio.checked = true;
                         }}
-                        // 즉각적인 시각적 피드백: 선택된 칩은 까만색/다크에메랄드(#012D1D) 고정, 미선택 칩은 기본 테두리 복원
+                        // 선택된 칩 시각적 스타일: 활성화 칩만 다크에메랄드(#012D1D), 나머지는 기본 흰색
                         chips.forEach(function(c) {{
                             var cKey = c.getAttribute('data-comp');
-                            if (cKey === targetKey) {{
+                            if (cKey === targetKey && targetKey !== 'none') {{
                                 c.classList.add('is-active');
                                 c.style.setProperty('background', '#012D1D', 'important');
                                 c.style.setProperty('color', '#FFFFFF', 'important');
@@ -9292,35 +9282,43 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         var menuLinks = section.querySelectorAll('.quick-menu-grid a.quick-menu-item');
                         menuLinks.forEach(function(a) {{
                             if (!a.getAttribute('data-base-href')) {{
-                                a.setAttribute('data-base-href', a.getAttribute('href'));
+                                var rawH = a.getAttribute('href') || '';
+                                a.setAttribute('data-base-href', rawH.split('&companion=')[0]);
                             }}
                             var cleanHref = a.getAttribute('data-base-href');
                             if (targetKey && targetKey !== 'none') {{
-                                a.setAttribute('href', cleanHref + '&companion=' + targetKey);
+                                var sep = cleanHref.indexOf('?') >= 0 ? '&' : '?';
+                                a.setAttribute('href', cleanHref + sep + 'companion=' + encodeURIComponent(targetKey));
                             }} else {{
                                 a.setAttribute('href', cleanHref);
                             }}
                         }});
                     }}
 
+                    // [홈 복귀 시 철저한 초기화: 캐시 및 URL 파라미터 완전 삭제 -> 알약 무선택 기본 상태 보장]
+                    try {{
+                        sessionStorage.removeItem('festapick_active_companion');
+                        var urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.has('companion')) {{
+                            urlParams.delete('companion');
+                            var cleanQuery = urlParams.toString();
+                            var cleanUrl = window.location.pathname + (cleanQuery ? '?' + cleanQuery : '');
+                            window.history.replaceState({{}}, '', cleanUrl);
+                        }}
+                    }} catch(e) {{}}
+                    setActive('none');
+
+                    // 알약 클릭 인터랙션: 클릭 시 알약만 토글되며, 동그라미 아이콘 밑에 글씨는 절대 쓰지 않음
                     chips.forEach(function(chip) {{
                         if (chip.getAttribute('data-bound') === 'true') return;
                         chip.setAttribute('data-bound', 'true');
                         chip.addEventListener('click', function(e) {{
                             e.preventDefault();
+                            e.stopPropagation();
                             var target = this.getAttribute('data-comp');
                             var current = section.getAttribute('data-active') || 'none';
                             var nextTarget = (current === target) ? 'none' : target;
                             setActive(nextTarget);
-
-                            // st.session_state.companion 동기화를 위한 URL 파라미터 갱신 및 저장
-                            var curUrl = new URL(window.location.href);
-                            if (nextTarget !== 'none') {{
-                                curUrl.searchParams.set('companion', nextTarget);
-                            }} else {{
-                                curUrl.searchParams.delete('companion');
-                            }}
-                            window.location.href = curUrl.pathname + curUrl.search;
                         }});
                     }});
 
@@ -9328,14 +9326,12 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         resetChip.setAttribute('data-bound', 'true');
                         resetChip.addEventListener('click', function(e) {{
                             e.preventDefault();
+                            e.stopPropagation();
                             setActive('none');
-                            var curUrl = new URL(window.location.href);
-                            curUrl.searchParams.delete('companion');
-                            window.location.href = curUrl.pathname + curUrl.search;
                         }});
                     }}
 
-                    // [5개 아이콘 클릭 분기] 동행인 선택 시 즉시 이동 / 미선택 시 퀵 선택 팝오버
+                    // [5개 아이콘 클릭 분기] 동행인 선택 시 즉시 이동 / 미선택 시 퀵 선택 팝오버 노출
                     var popover = document.getElementById('compPopover');
                     var popService = document.getElementById('compPopoverService');
                     var filterBar = document.getElementById('companionFilterBar');
@@ -9358,17 +9354,19 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                     var menuItems = section.querySelectorAll('.quick-menu-grid a.quick-menu-item');
                     menuItems.forEach(function(a) {{
                         if (!a.getAttribute('data-base-href')) {{
-                            a.setAttribute('data-base-href', a.getAttribute('href'));
+                            var rawH = a.getAttribute('href') || '';
+                            a.setAttribute('data-base-href', rawH.split('&companion=')[0]);
                         }}
                         if (a.getAttribute('data-nav-bound') === 'true') return;
                         a.setAttribute('data-nav-bound', 'true');
                         a.addEventListener('click', function(e) {{
                             var current = section.getAttribute('data-active') || 'none';
-                            var baseHref = this.getAttribute('data-base-href');
+                            var baseHref = this.getAttribute('data-base-href') || this.getAttribute('href');
                             e.preventDefault();
-                            if (current !== 'none') {{
-                                // 동행인 선택됨 -> 파라미터를 붙여 즉시 상세 페이지 이동
-                                window.location.href = baseHref + '&companion=' + current;
+                            if (current && current !== 'none') {{
+                                // 동행인 선택됨 -> 파라미터를 붙여 즉시 전용 상세 페이지 이동
+                                var sep = baseHref.indexOf('?') >= 0 ? '&' : '?';
+                                window.location.href = baseHref + sep + 'companion=' + encodeURIComponent(current);
                             }} else {{
                                 // 동행인 미선택 -> 퀵 선택 팝오버 노출
                                 var labelEl = this.querySelector('.quick-item-label');
@@ -9384,7 +9382,8 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                                 var key = this.getAttribute('data-pop-comp');
                                 if (!pendingHref) return;
                                 setActive(key);
-                                window.location.href = pendingHref + '&companion=' + key;
+                                var sep = pendingHref.indexOf('?') >= 0 ? '&' : '?';
+                                window.location.href = pendingHref + sep + 'companion=' + encodeURIComponent(key);
                             }});
                         }});
                         var closeBtn = document.getElementById('compPopoverClose');
@@ -9400,9 +9399,21 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                             if (e.key === 'Escape') closePopover();
                         }});
                     }}
+
+                    // 스크롤 복원
+                    function restoreSectionScroll() {{
+                        try {{
+                            var anchor = sessionStorage.getItem('festapick_scroll_anchor');
+                            if (anchor === 'conciergeSection' || window.location.hash === '#conciergeSection') {{
+                                section.scrollIntoView({{ behavior: 'auto', block: 'start' }});
+                                sessionStorage.removeItem('festapick_scroll_anchor');
+                                sessionStorage.removeItem('festapick_last_scroll_y');
+                            }}
+                        }} catch(err) {{}}
+                    }}
+                    restoreSectionScroll();
                 }}
                 setupConcierge();
-                // 브라우저 기본 호버 툴팁(title 속성 등) 원천 제거
                 function disableNativeTooltips() {{
                     document.querySelectorAll('[title]').forEach(function(el) {{
                         el.removeAttribute('title');
@@ -9415,8 +9426,7 @@ document.querySelectorAll('.chk-input').forEach((cb) => {{
                         disableNativeTooltips();
                     }});
                 }}
-                setTimeout(function() {{ setupConcierge(); disableNativeTooltips(); }}, 150);
-                setTimeout(function() {{ setupConcierge(); disableNativeTooltips(); }}, 500);
+                setTimeout(function() {{ setupConcierge(); disableNativeTooltips(); }}, 100);
             }})();
             </script>
         </div>

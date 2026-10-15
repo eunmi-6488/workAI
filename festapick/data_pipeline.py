@@ -2510,13 +2510,17 @@ def get_nearby_restaurants(target_lat: float, target_lng: float, radius_m: int =
 
                 # 이미 포함되었는지 확인
                 if not any(item["name"] == store_name for item in nearby):
+                    idx = len(nearby)
+                    # [0m 방지] 축제장과 100% 겹치지 않도록 기본 최소 오프셋(약 400m) 및 순번별 점진적 반경 부여
+                    offset_lat = 0.0032 + (idx * 0.0016)
+                    offset_lng = 0.0028 + (idx * 0.0018)
                     nearby.append({
                         "name": store_name,
-                        "lat": round(target_lat + (len(nearby) * 0.002), 7),
-                        "lng": round(target_lng + (len(nearby) * 0.002), 7),
+                        "lat": round(target_lat + offset_lat, 7),
+                        "lng": round(target_lng + offset_lng, 7),
                         "menu": m1 or "로컬 착한 메뉴",
                         "price": price_str,
-                        "_dist": 500.0 + (len(nearby) * 100)
+                        "_dist": 450.0 + (idx * 150.0)
                     })
                     if len(nearby) >= 6:
                         break

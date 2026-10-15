@@ -923,7 +923,7 @@ def render_course_explorer_page():
                 <span class="btn-icon">🌤️</span>
                 <span>날씨 확인</span>
             </a>
-            <a href="?view=main" target="_self" class="editorial-ghost-btn">
+            <a href="?view=main" target="_self" class="editorial-ghost-btn" onclick="try{{sessionStorage.removeItem('festapick_active_companion');}}catch(e){{}}">
                 <span class="btn-icon">←</span>
                 <span>메인으로 돌아가기</span>
             </a>
